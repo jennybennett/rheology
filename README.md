@@ -9,6 +9,8 @@ This package was designed to automate data analysis from a CSV collected on the 
 - Calculate strain crossover, angular frequency crossover, and recovery time.
 - Segment and graph tests from "Overall_Test_Jenny" which includes: time sweep, strain sweep, frequency sweep, cyclic strain sweep, and rotational shear step test.
 
+<img src="https://github.com/jennybennett/rheology/blob/main/pictures/cyclic_strain_sweep.PNG" width="100" height="100"/>
+
 ![cyclic strain](https://github.com/jennybennett/rheology/blob/main/pictures/cyclic_strain_sweep.PNG)![frequency](https://github.com/jennybennett/rheology/blob/main/pictures/frequency_sweep.PNG)![strain](https://github.com/jennybennett/rheology/blob/main/pictures/strain_sweep.PNG)
 
 ## Prerequisites:
