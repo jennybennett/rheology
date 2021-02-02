@@ -9,6 +9,8 @@ This package was designed to automate data analysis from a CSV collected on the 
 - Calculate strain crossover, angular frequency crossover, and recovery time.
 - Segment and graph tests from "Overall_Test_Jenny" which includes: time sweep, strain sweep, frequency sweep, cyclic strain sweep, and rotational shear step test.
 
+![cyclic strain](https://github.com/jennybennett/rheology/blob/main/pictures/cyclic_strain_sweep.PNG)
+
 ## Prerequisites:
 Python is the primary software for the 'rheology' package. Python 3.7 or higher version is recommended here. Meanwhile, serval python packages are also required in advance. They are pandas, numpy, and matplotlib, and can be easily installed by using conda, a package and environment control system. Refer to [here](https://docs.enthought.com/mayavi/mayavi/installation.html) for details on proper installation as well as other prerequisite packages.
 
