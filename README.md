@@ -5,15 +5,15 @@ In the DeForest lab, we are making user-tunable, injectable hydrogels. The tunab
 
 This package was designed to automate data analysis from a CSV collected on the AntonPaar rheometer in the Bindra Lab at the University of Washington. Features include:
 
-- Graphing average curves from up to 4 gel types on the same graph from tests including strain sweeps, frequency sweeps, time sweeps, cyclic strain sweeps, and rotational shear step tests.
-- 
+- Graph average curves from up to 4 gel types on the same graph.
+- Calculate strain crossover, angular frequency crossover, and recovery time.
+- Segment and graph tests from "Overall_Test_Jenny" which includes: time sweep, strain sweep, frequency sweep, cyclic strain sweep, and rotational shear step test.
 
 ## Prerequisites:
+Python is the primary software for the 'rheology' package. Python 3.7 or higher version is recommended here. Meanwhile, serval python packages are also required in advance. They are pandas, numpy, and matplotlib, and can be easily installed by using conda, a package and environment control system. Refer to [here](https://docs.enthought.com/mayavi/mayavi/installation.html) for details on proper installation as well as other prerequisite packages.
 
 ## Installation:
-
-## Overview:
-
-## Use Cases:
+Jump to a directory or create a new one where you want to save 'rheology' and then type the following command: git clone https://github.com/jennybennett/rheology.git
 
 ## License:
+[MIT](https://opensource.org/licenses/MIT)
