@@ -94,6 +94,7 @@ def all_tests_n(df):
     objs = []
     for n in range(len(start_css)):
         objs.append(rheo_data_css[n])
+
     # combine cyclic strain sweep periods and add to final dictionary
     rheo_data[5] = pd.concat(objs, axis=0, join='outer', ignore_index=False,
                              keys=None,levels=None, names=None,
@@ -103,10 +104,18 @@ def all_tests_n(df):
     drop_columns_2 = ['Storage Modulus', 'Loss Modulus', 'Angular Frequency', 'Status'] # columns to be dropped with no data
     rheo_data[6] = single_test_n(df, 3651, 3678, drop_columns_2)
 
+    # create zoomed in cyclic strain sweep
+    objs_zoom = [rheo_data_css[0][499:], rheo_data_css[1], rheo_data_css[2][:100]]
+
+    # combine zoom cyclic strain sweep periods and add to final dictionary
+    rheo_data[7] = pd.concat(objs_zoom, axis=0, join='outer', ignore_index=False,
+                             keys=None,levels=None, names=None,
+                             verify_integrity=False, copy=True)
+
     return rheo_data
 
 
-def all_tests(df1, df2=pd.DataFrame([]), df3=pd.DataFrame([]), df4=pd.DataFrame([])):
+def all_tests(df1, df2=pd.DataFrame([]), df3=pd.DataFrame([]), df4=pd.DataFrame([]), df5=pd.DataFrame([])):
     out = []
 
     n1 = all_tests_n(df1)
@@ -121,8 +130,12 @@ def all_tests(df1, df2=pd.DataFrame([]), df3=pd.DataFrame([]), df4=pd.DataFrame(
         out.append(n3)
 
     if df4.empty==False:
-        n2 = all_tests_n(df4)
+        n4 = all_tests_n(df4)
         out.append(n4)
+
+    if df5.empty==False:
+        n5 = all_tests_n(df5)
+        out.append(n5)
 
     return out
 
@@ -205,7 +218,7 @@ def all_tests_avg(group):
     var_ss = ['Strain', 'Storage Modulus', 'Loss Modulus']
     var_st = ['Shear Rate', 'Viscosity']
 
-    for i in (0, 2, 4, 5):
+    for i in (0, 2, 4, 5, 7):
         all_tests_avg[i] = single_test_avg(var_ts, group, i)
 
     all_tests_avg[1] = single_test_avg(var_fs, group, 1)
@@ -519,7 +532,7 @@ def graph_modulus_comparison(df1, x, y1, y2, y1legend_df1, y2legend_df1, ylabel,
 
     # set axis parameters
     if ss==True: # change x limit for strain sweep
-        ax.set_xlim(40, 300)
+        ax.set_xlim(50, 500)
         ax.set_ylim(50, 10000)
     else:
         ax.set_ylim(10**1, 10**4)
@@ -536,7 +549,7 @@ def graph_modulus_comparison(df1, x, y1, y2, y1legend_df1, y2legend_df1, ylabel,
     return
 
 
-def graph_recovery_comparison(df1, x, y1, y2, y1legend_df1, y2legend_df1, ylabel, xlabel, xscale, title, s=50, df2=pd.Series([]), y1legend_df2='', y2legend_df2='', df3=pd.Series([]), y1legend_df3='', y2legend_df3='', df4=pd.Series([]), y1legend_df4='', y2legend_df4=''):
+def graph_recovery_comparison(df1, x, y1, y2, y1legend_df1, y2legend_df1, ylabel, xlabel, xscale, title, s=50, df2=pd.Series([]), y1legend_df2='', y2legend_df2='', df3=pd.Series([]), y1legend_df3='', y2legend_df3='', df4=pd.Series([]), y1legend_df4='', y2legend_df4='', zoom=False):
     '''
     This function graphs a comparison of rheology dataframes from
     "OverallTest_Jenny" oscillating tests using storage modulus and
@@ -612,94 +625,116 @@ def graph_recovery_comparison(df1, x, y1, y2, y1legend_df1, y2legend_df1, ylabel
     # convert to minutes
     x_min = 'Time (min)'
 
-    df1[x_min] = (df1[x] - df1[x][450])/60
-    if df2.empty==False:
-        df2[x_min] = (df2[x] - df2[x][450])/60
-    if df3.empty==False:
-        df3[x_min] = (df3[x] - df3[x][450])/60
-    if df4.empty==False:
-        df4[x_min] = (df4[x] - df4[x][450])/60
+    if zoom == False:
+        df1[x_min] = (df1[x] - df1[x][450])/60
+        if df2.empty==False:
+            df2[x_min] = (df2[x] - df2[x][450])/60
+        if df3.empty==False:
+            df3[x_min] = (df3[x] - df3[x][450])/60
+        if df4.empty==False:
+            df4[x_min] = (df4[x] - df4[x][450])/60
+
+        fs = 8
+
+    else:
+
+        df1[x_min] = (df1[x] - df1[x][949])/60
+        if df2.empty==False:
+            df2[x_min] = (df2[x] - df2[x][949])/60
+        if df3.empty==False:
+            df3[x_min] = (df3[x] - df3[x][949])/60
+        if df4.empty==False:
+            df4[x_min] = (df4[x] - df4[x][949])/60
+
+        fs = 6
 
     # create figure for graphing
-    fig, ax = plt.subplots(figsize=(6, 6))
+    fig, ax = plt.subplots(figsize=(fs, fs))
+
+    # highlight high strain regions
+    if zoom == False:
+        st1 = (4898 - 3098)/60
+        end1 = (4955 - 3098)/60
+
+        st2 = (6758 - 3098)/60
+        end2 = (6815 - 3098)/60
+
+        st3 = (8618 - 3098)/60
+        end3 = (8675 - 3098)/60
+
+        st4 = (10478 - 3098)/60
+        end4 = (10535 - 3098)/60
+
+        plt.axvspan(st1, end1, color='lightgray', zorder=0)
+        plt.axvspan(st2, end2, color='lightgray', zorder=0)
+        plt.axvspan(st3, end3, color='lightgray', zorder=0)
+        plt.axvspan(st4, end4, color='lightgray', zorder=0)
+
+    else:
+        st1 = (4898 - 4595)/60
+        end1 = (4955 - 4595)/60
+
+        plt.axvspan(st1, end1, color='lightgray', zorder=0)
 
     # graph storage modulus points and line df1
-    df1.plot(y=y1, x=x_min, kind='scatter', c='r', ax=ax, s=s, label=y1legend_df1)
+    df1.plot(y=y1, x=x_min, kind='scatter', c='r', ax=ax, s=s, label=y1legend_df1, zorder=5)
     df1.plot(y=y1, x=x_min, kind='line', c='r', ax=ax, linewidth=0.5,
-            label='')
+            label='', zorder=5)
     # graph loss modulus points and line df1
     df1.plot(y=y2, x=x_min, kind='scatter', c='pink', marker="$\u25EF$",
-             ax=ax, s=s, label=y2legend_df1)
+             ax=ax, s=s, label=y2legend_df1, zorder=1)
     df1.plot(y=y2, x=x_min, kind='line', c='pink', ax=ax, linewidth=0.5,
-            label='')
+            label='', zorder=1)
 
     if df2.empty==False:
         # graph storage modulus points and line df2
-        df2.plot(y=y1, x=x_min, kind='scatter', c='b', ax=ax, s=s, label=y1legend_df2)
+        df2.plot(y=y1, x=x_min, kind='scatter', c='b', ax=ax, s=s, label=y1legend_df2, zorder=6)
         df2.plot(y=y1, x=x_min, kind='line', c='b', ax=ax, linewidth=0.5,
-                 label='')
+                 label='', zorder=6)
         # graph loss modulus points and line df2
         df2.plot(y=y2, x=x_min, kind='scatter', c='lightblue', marker="$\u25EF$",
-                 ax=ax, s=s, label=y2legend_df2)
+                 ax=ax, s=s, label=y2legend_df2, zorder=2)
         df2.plot(y=y2, x=x_min, kind='line', c='lightblue', ax=ax, linewidth=0.5,
-                 label='')
+                 label='', zorder=2)
 
     if df3.empty==False:
         # graph storage modulus points and line df3
-        df3.plot(y=y1, x=x_min, kind='scatter', c='forestgreen', ax=ax, s=s, label=y1legend_df3)
+        df3.plot(y=y1, x=x_min, kind='scatter', c='forestgreen', ax=ax, s=s, label=y1legend_df3, zorder=7)
         df3.plot(y=y1, x=x_min, kind='line', c='forestgreen', ax=ax, linewidth=0.5,
-                label='')
+                label='', zorder=7)
         # graph loss modulus points and line df3
         df3.plot(y=y2, x=x_min, kind='scatter', c='lightgreen', marker="$\u25EF$",
-                 ax=ax, s=s, label=y2legend_df3)
+                 ax=ax, s=s, label=y2legend_df3, zorder=3)
         df3.plot(y=y2, x=x_min, kind='line', c='lightgreen', ax=ax, linewidth=0.5,
-                 label='')
+                 label='', zorder=3)
 
     if df4.empty==False:
         # graph storage modulus points and line df3
-        df4.plot(y=y1, x=x_min, kind='scatter', c='orange', ax=ax, s=s, label=y1legend_df4)
+        df4.plot(y=y1, x=x_min, kind='scatter', c='orange', ax=ax, s=s, label=y1legend_df4, zorder=8)
         df4.plot(y=y1, x=x_min, kind='line', c='orange', ax=ax, linewidth=0.5,
-                label='')
+                label='', zorder=8)
         # graph loss modulus points and line df3
         df4.plot(y=y2, x=x_min, kind='scatter', c='navajowhite', marker="$\u25EF$",
-                 ax=ax, s=s, label=y2legend_df4)
+                 ax=ax, s=s, label=y2legend_df4, zorder=4)
         df4.plot(y=y2, x=x_min, kind='line', c='navajowhite', ax=ax, linewidth=0.5,
-                 label='')
-
-    # legend location and change yscale to log
-    plt.legend(loc='center left', fontsize=14, framealpha=10, bbox_to_anchor=(1, 0.5))
-    plt.yscale("log")
-    plt.xscale(xscale)
-
-    # highlight high strain regions
-    st1 = (4898 - 3098)/60
-    end1 = (4955 - 3098)/60
-
-    st2 = (6758 - 3098)/60
-    end2 = (6815 - 3098)/60
-
-    st3 = (8618 - 3098)/60
-    end3 = (8675 - 3098)/60
-
-    st4 = (10478 - 3098)/60
-    end4 = (10535 - 3098)/60
-
-    plt.axvspan(st1, end1, color='lightgray')
-    plt.axvspan(st2, end2, color='lightgray')
-    plt.axvspan(st3, end3, color='lightgray')
-    plt.axvspan(st4, end4, color='lightgray')
+                 label='', zorder=4)
 
     # set axis parameters
-    ax.set_ylim(10**1, 10**4)
+    ax.set_ylim(-1, 10**5)
     ax.set_ylabel(ylabel, fontsize=18)
     ax.set_xlabel(xlabel, fontsize=18)
     ax.tick_params(length=7, labelsize=14)
     ax.tick_params(which='minor', length=4)
     ax.set_title(title, fontsize=20)
+    ax.set_yscale('symlog')
+    ax.set_xscale(xscale)
 
     # set axis on top layer and non transparent
     ax.set_zorder(1)
     ax.set_frame_on(True)
+
+    # legend location and change yscale to log
+    plt.legend(loc='center left', fontsize=14, framealpha=10, bbox_to_anchor=(1, 0.5))
 
     return
 
@@ -833,13 +868,13 @@ def storage_modulus(group):
     storage_modulus(txt, name)
     '''
     # average storage modulus for time sweep period 0, 2, 4
-    name = ["n1 G' [Pa]", "n2 G' [Pa]", "n3 G' [Pa]",]
+    name = ["n1 G' [Pa]", "n2 G' [Pa]", "n3 G' [Pa]", "n4 G' [Pa]", "n5 G' [Pa]"]
     sm = [] # empty list of average G' for all n
 
     for i in (0, 2): # loop through each period 0, 2, 4
         sm_n = []  # empty list of average G' for single n
         for n in range(len(group)): # loop through each n for each period
-            sm_n.append(group[n][i]['Storage Modulus'].mean()) # append mean G'
+            sm_n.append(group[n][i][59:]['Storage Modulus'].mean()) # append mean G'
         sm.append(sm_n)
 
     sm_df_raw = pd.DataFrame(sm) # G' into dataframe
@@ -1060,10 +1095,22 @@ def recovery_step1(group, rtype=1):
     rheology.recovery_step1(txt)
     '''
     for g in group:
-        sm_in = g[5][0:600]['Storage Modulus'].mean() # average G' from initial low strain
-        sm_half = sm_in / 2 # half the average G' from intial low strain
+        start = [0, 600, 1017, 1218, 1635, 1836, 2253, 2454, 2871]
+        end = [600, 619, 1218, 1237, 1836, 1855, 2454, 2473, 3072]
+        sm = []
+        for s, e in zip(start, end):
+            sm.append(g[5][s:e]['Storage Modulus'].mean()) # average G' from interval
 
-        sm_half_array = np.full((len(g[5]), 1), sm_half)
+        sm_half =[]
+        for i in [0, 2, 4, 6]:
+            sm_half.append((sm[i] - sm[i+1]) / 2) # half the average G' from difference between intial low and high strain
+
+        sm_h_1 = np.full((1218, 1), sm_half[0])
+        sm_h_2 = np.full((618, 1), sm_half[1])
+        sm_h_3 = np.full((618, 1), sm_half[2])
+        sm_h_4 = np.full((618, 1), sm_half[3])
+        sm_half_array = np.concatenate((sm_h_1, sm_h_2, sm_h_3, sm_h_4))
+
         g[5]['sm_half'] = sm_half_array # insert new column into df to include half G' value
 
         if rtype==1:
@@ -1082,14 +1129,10 @@ def recovery_step1(group, rtype=1):
 
     indexes = [] # empty list for indexes
     for n in range(len(group)):
-        in1 = rt[n][0:1].index.values # find index for first entry
-        in2 = rt[n][1:2].index.values
-        in3 = rt[n][2:3].index.values
-        in4 = rt[n][3:4].index.values
-
-        ind = [in1[0], in2[0], in3[0], in4[0]] # create list of 4 indexes (from recovery times)
-
-        indexes.append(ind) # indexes for each n
+        indexes_n = []
+        for i in range(len(rt[n])):
+            indexes_n.append(rt[n][i:i+1].index.values[0]) # find index for first entry
+        indexes.append(indexes_n)
 
     return rt, indexes # return recovery time dicitonary of dataframes and indexes
 
